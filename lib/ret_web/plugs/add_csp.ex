@@ -189,6 +189,7 @@ defmodule RetWeb.Plugs.AddCSP do
         "https://www.google-analytics.com",
         "https://www.youtube.com",
         "https://fonts.gstatic.com",
+        "wss://0001.stable.sora-labo.shiguredo.app/signaling",
         assets_url,
         cors_proxy_url,
         custom_rules[:connect_src],
