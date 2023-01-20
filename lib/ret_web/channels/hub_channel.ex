@@ -1199,6 +1199,10 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:subscriptions, %{web_push: is_push_subscribed, favorites: is_favorited})
         |> Map.put(:perms_token, perms_token)
         |> Map.put(:hub_requires_oauth, params[:hub_requires_oauth])
+        |> Map.put(:sora_channel_id, "hao-sora-test@YHhaoareyou#43674499")
+        |> Map.put(:sora_signaling_url, "wss://0001.stable.sora-labo.shiguredo.app/signaling")
+        |> Map.put(:sora_access_token, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaGFubmVsX2lkIjoiaGFvLXNvcmEtdGVzdEBZSGhhb2FyZXlvdSM0MzY3NDQ5OSIsImV4cCI6MTY3NDI3NTkxOX0.1pzXsoEgnZFNkfO4lMzFsk8AASNmROflNXsXw3EyXFk")
+        |> Map.put(:sora_is_debug, false)
 
       existing_stat_count =
         socket
