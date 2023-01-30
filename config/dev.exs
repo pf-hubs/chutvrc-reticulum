@@ -2,7 +2,7 @@ use Mix.Config
 
 # NOTE: this file contains some security keys/certs that are *not* secrets, and are only used for local development purposes.
 
-host = "localhost"
+host = "localhost" # host = "192.168.11.4"
 cors_proxy_host = "hubs-proxy.local"
 assets_host = "hubs-assets.local"
 link_host = "hubs-link.local"
@@ -155,7 +155,7 @@ config :ret, Ret.Storage,
   ttl: 60 * 60 * 24
 
 asset_hosts =
-  "https://localhost:4000 https://localhost:8080 " <>
+  "https://localhost:4000 https://localhost:8080 https://localhost:8989 " <>
     "https://#{host}:4000 https://#{host}:8080 https://#{host}:3000 https://#{host}:8989 https://#{
       host
     }:9090 https://#{cors_proxy_host}:4000 " <>
@@ -173,7 +173,7 @@ config :ret, RetWeb.Plugs.AddCSP,
   font_src: asset_hosts,
   style_src: asset_hosts,
   connect_src:
-    "https://#{host}:8080 https://sentry.prod.mozaws.net #{asset_hosts} #{websocket_hosts} https://www.mozilla.org",
+    "https://#{host}:8080 https://sentry.prod.mozaws.net #{asset_hosts} #{websocket_hosts} https://www.mozilla.org https://#{host}:3333 https://#{host}:3000 https://localhost:3000",
   img_src: asset_hosts,
   media_src: asset_hosts,
   manifest_src: asset_hosts
