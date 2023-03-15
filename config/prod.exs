@@ -130,6 +130,10 @@ config :ret, RetWeb.Plugs.HeaderAuthorization, header_name: "x-ret-admin-access-
 
 config :ret, Ret.Mailer,
   adapter: Bamboo.SMTPAdapter,
+  server: "smtp.gmail.com",
+  port: 587,
+  username: "xxx@gmail.com",
+  password: "xxx",
   tls: :always,
   ssl: false,
   retries: 3
