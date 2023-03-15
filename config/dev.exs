@@ -184,7 +184,16 @@ config :ret, RetWeb.Plugs.AddCSP,
   media_src: asset_hosts,
   manifest_src: asset_hosts
 
-config :ret, Ret.Mailer, adapter: Bamboo.LocalAdapter
+# config :ret, Ret.Mailer, adapter: Bamboo.LocalAdapter
+config :ret, Ret.Mailer,
+  adapter: Bamboo.SMTPAdapter,
+  server: "smtp.gmail.com",
+  port: 587,
+  username: "xxx@gmail.com",
+  password: "xxx",
+  tls: :always,
+  ssl: false,
+  retries: 3
 
 config :ret, RetWeb.Email, from: "info@hubs-mail.com"
 
