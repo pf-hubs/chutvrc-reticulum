@@ -1199,9 +1199,9 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:subscriptions, %{web_push: is_push_subscribed, favorites: is_favorited})
         |> Map.put(:perms_token, perms_token)
         |> Map.put(:hub_requires_oauth, params[:hub_requires_oauth])
-        |> Map.put(:sora_channel_id, "coi-dev-202302@8X9BZRJCC42R4PTQNSD9EQ90PBA4JVV9") # hub.hub_sid
+        |> Map.put(:sora_channel_id, "#{hub.hub_sid}@xxx")
         |> Map.put(:sora_signaling_url, ["wss://0001.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.2022-2.sora.sora-cloud.shiguredo.app/signaling"])
-        |> Map.put(:sora_access_token, "access-token-here")
+        |> Map.put(:sora_access_token, hub.sora_access_token)
         |> Map.put(:sora_is_debug, false)
 
       existing_stat_count =

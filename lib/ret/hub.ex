@@ -104,6 +104,8 @@ defmodule Ret.Hub do
     field :user_data, :map
     field :allow_promotion, :boolean
     field :room_size, :integer
+    field :sfu, :integer, default: 0
+    field :sora_access_token, :string
 
     belongs_to :created_by_account, Ret.Account, references: :account_id
 
@@ -140,6 +142,8 @@ defmodule Ret.Hub do
     :default_environment_gltf_bundle_url,
     :user_data,
     :last_active_at,
+    :sfu,
+    :sora_access_token,
     :entry_mode | @required_keys
   ]
 
@@ -148,16 +152,21 @@ defmodule Ret.Hub do
   #       so that there did not need to be as many variations.
   def create_room(params, account_or_nil) do
     with {:ok, params} <- parse_member_permissions(params) do
+      sid = Ret.Sids.generate_sid()
+      # access_token = Ret.SoraChannelResolver.request_access_token(sid)
+
       params =
         Map.merge(
           %{
             name: Ret.RandomRoomNames.generate_room_name(),
-            hub_sid: Ret.Sids.generate_sid(),
+            hub_sid: sid,
             host: RoomAssigner.get_available_host(nil),
             creator_assignment_token: SecureRandom.hex(),
             embed_token: SecureRandom.hex(),
             member_permissions: default_member_permissions(),
-            room_size: AppConfig.get_cached_config_value("features|default_room_size")
+            room_size: AppConfig.get_cached_config_value("features|default_room_size"),
+            # sfu: 1,
+            # sora_access_token: access_token
           },
           params
         )
@@ -177,7 +186,7 @@ defmodule Ret.Hub do
           less_than_or_equal_to: AppConfig.get_cached_config_value("features|max_room_size")
         )
         |> unique_constraint(:hub_sid)
-        |> Repo.insert()
+        |> Repo.insert() # Databaseに入れる
 
       case result do
         {:ok, hub} ->
@@ -411,6 +420,7 @@ defmodule Ret.Hub do
     |> add_hub_sid_to_changeset
     |> add_generated_tokens_to_changeset
     |> add_default_member_permissions_to_changeset
+    |> add_sora_access_token_to_changeset
     |> unique_constraint(:hub_sid)
   end
 
@@ -697,6 +707,12 @@ defmodule Ret.Hub do
     changeset
     |> put_change(:creator_assignment_token, creator_assignment_token)
     |> put_change(:embed_token, embed_token)
+  end
+
+  defp add_sora_access_token_to_changeset(changeset) do
+    changeset
+    |> put_change(:sfu, 0)
+    |> put_change(:sora_access_token, fetch_change(changeset, :hub_sid) |> elem(1) |> Ret.SoraChannelResolver.request_access_token())
   end
 
   def janus_room_id_for_hub(hub) do
