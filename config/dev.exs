@@ -2,19 +2,18 @@ use Mix.Config
 
 # NOTE: this file contains some security keys/certs that are *not* secrets, and are only used for local development purposes.
 
-host = "localhost"
-# host = "10.10.0.30"
-# host = "192.168.11.4"
+# host = "localhost"
+host = "change.vr.u-tokyo.ac.jp"
 
 cors_proxy_host = "hubs-proxy.local"
 assets_host = "hubs-assets.local"
 link_host = "hubs-link.local"
-dev_janus_host = "localhost"
-# dev_janus_host = "10.10.0.30"
-# dev_janus_host = "192.168.11.4"
+# dev_janus_host = "localhost"
+dev_janus_host = "change.vr.u-tokyo.ac.jp"
 
 # To run reticulum across a LAN for local testing, uncomment and change the line below to the LAN IP
-# host = cors_proxy_host = "192.168.1.27"
+# host = cors_proxy_host = "localhost"
++cors_proxy_host = "change.vr.u-tokyo.ac.jp"
 
 import_config "dev.secret.exs"
 
