@@ -16,6 +16,8 @@ dev_janus_host = "localhost"
 # To run reticulum across a LAN for local testing, uncomment and change the line below to the LAN IP
 # host = cors_proxy_host = "192.168.1.27"
 
+import_config "dev.secret.exs"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -184,13 +186,17 @@ config :ret, RetWeb.Plugs.AddCSP,
   media_src: asset_hosts,
   manifest_src: asset_hosts
 
+# config :ret, Ret.SoraChannelResolver,
+#   bearer_token: <defined in config/dev.secret.exs>,
+#   project_id: <defined in config/dev.secret.exs>
+
 # config :ret, Ret.Mailer, adapter: Bamboo.LocalAdapter
 config :ret, Ret.Mailer,
   adapter: Bamboo.SMTPAdapter,
   server: "smtp.gmail.com",
   port: 587,
-  username: "xxx@gmail.com",
-  password: "xxx",
+  # username: <defined in config/dev.secret.exs>,
+  # password: <defined in config/dev.secret.exs>,
   tls: :always,
   ssl: false,
   retries: 3

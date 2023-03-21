@@ -3,17 +3,15 @@ defmodule Ret.SoraChannelResolver do
   require HTTPoison
 
   @api_endpoint "https://api.sora-cloud.shiguredo.app/projects/create-access-token"
-  @bearer_token "xxx"
-  @project_id "xxx"
 
   def request_access_token(channel_id) do
     headers = [
-      {"Authorization", "Bearer #{@bearer_token}"},
+      {"Authorization", "Bearer #{bearer_token()}"},
       {"Content-Type", "application/json"}
     ]
 
     body = Poison.encode!(%{
-      channel_id: "#{channel_id}@#{@project_id}",
+      channel_id: "#{channel_id}@#{project_id()}",
       not_before: DateTime.utc_now() |> Timex.format("%FT%T%:z", :strftime) |> elem(1),
       expiration_time: DateTime.utc_now() |> Timex.shift(months: 1) |> Timex.format("%FT%T%:z", :strftime) |> elem(1)
     })
@@ -28,5 +26,13 @@ defmodule Ret.SoraChannelResolver do
         Logger.error("POST request failed: #{inspect(reason)}")
         {:error, reason}
     end
+  end
+
+  defp bearer_token do
+    Application.get_env(:ret, Ret.SoraChannelResolver)[:bearer_token]
+  end
+
+  def project_id do
+    Application.get_env(:ret, Ret.SoraChannelResolver)[:project_id]
   end
 end
