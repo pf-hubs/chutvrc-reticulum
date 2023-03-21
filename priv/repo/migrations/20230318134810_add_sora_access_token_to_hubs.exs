@@ -4,7 +4,7 @@ defmodule Ret.Repo.Migrations.AddSoraAccessTokenToHubs do
   def change do
     alter table("hubs") do
       add :sfu, :integer, null: false, default: 0
-      add :sora_access_token, :string
+      add :sora_access_token, :text
     end
   end
 end
