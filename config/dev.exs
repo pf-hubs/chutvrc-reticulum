@@ -13,7 +13,7 @@ dev_janus_host = "change.vr.u-tokyo.ac.jp"
 
 # To run reticulum across a LAN for local testing, uncomment and change the line below to the LAN IP
 # host = cors_proxy_host = "localhost"
-+cors_proxy_host = "change.vr.u-tokyo.ac.jp"
+cors_proxy_host = "change.vr.u-tokyo.ac.jp"
 
 import_config "dev.secret.exs"
 
