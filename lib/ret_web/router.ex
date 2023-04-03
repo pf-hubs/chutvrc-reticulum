@@ -178,6 +178,10 @@ defmodule RetWeb.Router do
       resources "/accounts", Api.V1.AccountController, only: [:create, :delete]
       patch "/accounts", Api.V1.AccountController, :update
       resources "/accounts/search", Api.V1.AccountSearchController, only: [:create]
+      # get "/server_configs/schemas", Api.V1.ServerConfigController, :get_schemas
+      # get "/server_configs/admin_info", Api.V1.ServerConfigController, :get_admin_info
+      get "/server_configs/editable_config", Api.V1.ServerConfigController, :get_editable_config
+      resources "/server_configs/config", Api.V1.ServerConfigController, only: [:index, :create]
     end
   end
 
