@@ -181,6 +181,19 @@ defmodule Ret.Application do
         id: :app_config_owned_file_uri_cache
       ),
 
+      # Server Config cache
+      worker(
+        Cachex,
+        [
+          :server_config,
+          [
+            expiration: expiration(default: :timer.seconds(10)),
+            fallback: fallback(default: &Ret.ServerConfig.fetch_config/1)
+          ]
+        ],
+        id: :server_config_cache
+      ),
+
       # General asset cache
       worker(
         Cachex,
