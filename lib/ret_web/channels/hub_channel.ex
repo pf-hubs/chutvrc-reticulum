@@ -545,6 +545,10 @@ defmodule RetWeb.HubChannel do
     socket |> handle_entry_mode_change(:deny)
   end
 
+  def handle_in("sfu_switched", _payload, socket) do
+    socket |> handle_sfu_change()
+  end
+
   def handle_in("update_scene", %{"url" => url}, socket) do
     hub = socket |> hub_for_socket |> Repo.preload([:scene, :scene_listing])
     account = Guardian.Phoenix.Socket.current_resource(socket)
@@ -853,6 +857,19 @@ defmodule RetWeb.HubChannel do
       |> Repo.update!()
       |> Repo.preload(Hub.hub_preloads())
       |> broadcast_hub_refresh!(socket, ["entry_mode"])
+    end
+
+    {:noreply, socket}
+  end
+
+  defp handle_sfu_change(socket) do
+    hub = socket |> hub_for_socket
+    account = Guardian.Phoenix.Socket.current_resource(socket)
+
+    if account |> can?(close_hub(hub)) do
+      hub
+      |> Repo.preload(Hub.hub_preloads())
+      |> broadcast_hub_refresh!(socket, ["sfu"])
     end
 
     {:noreply, socket}
@@ -1199,10 +1216,17 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:subscriptions, %{web_push: is_push_subscribed, favorites: is_favorited})
         |> Map.put(:perms_token, perms_token)
         |> Map.put(:hub_requires_oauth, params[:hub_requires_oauth])
-        |> Map.put(:sora_channel_id, "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}")
-        |> Map.put(:sora_signaling_url, ["wss://0001.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.2022-2.sora.sora-cloud.shiguredo.app/signaling"])
-        |> Map.put(:sora_access_token, hub.sora_access_token)
-        |> Map.put(:sora_is_debug, false)
+        |> Map.put(:sfu, hub.sfu)
+
+      response = case hub.sfu do
+        0 ->
+          response
+          |> Map.put(:sora_channel_id, "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}")
+          |> Map.put(:sora_signaling_url, ["wss://0001.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.2022-2.sora.sora-cloud.shiguredo.app/signaling"])
+          |> Map.put(:sora_access_token, hub.sora_access_token)
+          |> Map.put(:sora_is_debug, false)
+        _ -> response
+      end
 
       existing_stat_count =
         socket
