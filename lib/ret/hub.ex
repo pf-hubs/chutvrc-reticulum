@@ -481,6 +481,14 @@ defmodule Ret.Hub do
     end
   end
 
+  def maybe_add_sfu_to_changeset(changeset, attrs) do
+    if attrs["sfu"] === nil do
+      changeset
+    else
+      changeset |> put_change(:sfu, String.to_integer(attrs["sfu"]))
+    end
+  end
+
   def maybe_add_new_scene_to_changeset(changeset, %{scene_id: scene_id}) do
     scene_or_scene_listing = get_scene_or_scene_listing_by_id(scene_id)
 
