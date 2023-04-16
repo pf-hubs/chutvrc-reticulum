@@ -506,6 +506,7 @@ defmodule RetWeb.HubChannel do
       |> Hub.add_member_permissions_to_changeset(payload)
       |> Hub.maybe_add_promotion_to_changeset(account, hub, payload)
       |> Hub.maybe_add_entry_mode_to_changeset(payload)
+      |> Hub.maybe_add_sfu_to_changeset(payload)
       |> Repo.update!()
       |> Repo.preload(Hub.hub_preloads())
       |> broadcast_hub_refresh!(socket, stale_fields)
@@ -543,10 +544,6 @@ defmodule RetWeb.HubChannel do
 
   def handle_in("close_hub", _payload, socket) do
     socket |> handle_entry_mode_change(:deny)
-  end
-
-  def handle_in("sfu_switched", _payload, socket) do
-    socket |> handle_sfu_change()
   end
 
   def handle_in("update_scene", %{"url" => url}, socket) do
@@ -857,19 +854,6 @@ defmodule RetWeb.HubChannel do
       |> Repo.update!()
       |> Repo.preload(Hub.hub_preloads())
       |> broadcast_hub_refresh!(socket, ["entry_mode"])
-    end
-
-    {:noreply, socket}
-  end
-
-  defp handle_sfu_change(socket) do
-    hub = socket |> hub_for_socket
-    account = Guardian.Phoenix.Socket.current_resource(socket)
-
-    if account |> can?(close_hub(hub)) do
-      hub
-      |> Repo.preload(Hub.hub_preloads())
-      |> broadcast_hub_refresh!(socket, ["sfu"])
     end
 
     {:noreply, socket}
