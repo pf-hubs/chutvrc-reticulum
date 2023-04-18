@@ -483,7 +483,7 @@ defmodule RetWeb.HubChannel do
       entry_mode_changed =
         payload["entry_mode"] !== nil and hub.entry_mode != payload["entry_mode"]
 
-      sfu_changed = !Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") and payload["sfu"] !== nil and hub.sfu != payload["sfu"]
+      sfu_changed = Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") and payload["sfu"] !== nil and hub.sfu != payload["sfu"]
 
       stale_fields = []
       stale_fields = if name_changed, do: ["name" | stale_fields], else: stale_fields
