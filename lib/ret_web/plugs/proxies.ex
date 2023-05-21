@@ -1,16 +1,18 @@
 defmodule RetWeb.Plugs.PostgrestProxy do
   use Plug.Builder
-  require Logger
 
   plug :call
 
   @spec call(Plug.Conn.t(), []) :: Plug.Conn.t()
   def call(conn, []) do
-    case conn.method() do
-      "PATCH" ->
-        on_patch(conn)
-      _ ->
-        conn
+    case List.first(conn.path_info) do
+      "hubs" ->
+        case conn.method() do
+          "PATCH" ->
+            on_hubs_updated(conn)
+          _ -> conn
+        end
+      _ -> conn
     end
     opts = ReverseProxyPlug.init(upstream: "http://#{hostname()}:3001")
     ReverseProxyPlug.call(conn, opts)
@@ -23,16 +25,11 @@ defmodule RetWeb.Plugs.PostgrestProxy do
       |> Application.fetch_env!(__MODULE__)
       |> Keyword.fetch!(:hostname)
 
-  defp on_patch(conn) do
+  defp on_hubs_updated(conn) do
     case Regex.run(~r/id=eq\.(\d+)/, conn.query_string) do
       nil -> {:error, "No match found"}
       match ->
-        id = List.last(match)
-        case Ret.Hub |> Ret.Repo.get_by(hub_id: id) do
-          nil -> {:error, "No record found"}
-          hub ->
-            RetWeb.Endpoint.broadcast("hub:" <> hub.hub_sid, "hub_refresh_by_admin", %{})
-        end
+        RetWeb.HubChannel.refresh_room_by_id(List.last(match))
     end
   end
 end

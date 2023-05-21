@@ -791,6 +791,14 @@ defmodule RetWeb.HubChannel do
     {:noreply, socket}
   end
 
+  def refresh_room_by_id(id) do
+    case Ret.Hub |> Ret.Repo.get_by(hub_id: id) do
+      nil -> {:error, "No record found"}
+      hub ->
+        RetWeb.Endpoint.broadcast("hub:" <> hub.hub_sid, "hub_refresh_by_admin", %{})
+    end
+  end
+
   defp maybe_push_naf(
          socket,
          event,
