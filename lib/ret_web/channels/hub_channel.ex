@@ -544,6 +544,8 @@ defmodule RetWeb.HubChannel do
       entry_mode_changed =
         payload["entry_mode"] !== nil and hub.entry_mode != payload["entry_mode"]
 
+      sfu_changed = Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") and payload["sfu"] !== nil and hub.sfu != payload["sfu"]
+
       stale_fields = []
       stale_fields = if name_changed, do: ["name" | stale_fields], else: stale_fields
 
@@ -562,11 +564,14 @@ defmodule RetWeb.HubChannel do
 
       stale_fields = if entry_mode_changed, do: ["entry_mode" | stale_fields], else: stale_fields
 
+      stale_fields = if sfu_changed, do: ["sfu" | stale_fields], else: stale_fields
+
       hub
       |> Hub.add_attrs_to_changeset(payload)
       |> Hub.add_member_permissions_to_changeset(payload)
       |> Hub.maybe_add_promotion_to_changeset(account, hub, payload)
       |> Hub.maybe_add_entry_mode_to_changeset(payload)
+      |> Hub.maybe_add_sfu_to_changeset(payload)
       |> Repo.update!()
       |> Repo.preload(Hub.hub_preloads())
       |> broadcast_hub_refresh!(socket, stale_fields)
@@ -850,6 +855,14 @@ defmodule RetWeb.HubChannel do
   def handle_out("host_changed" = event, payload, socket) do
     push(socket, event, payload)
     {:noreply, socket}
+  end
+
+  def refresh_room_by_id(id) do
+    case Ret.Hub |> Ret.Repo.get_by(hub_id: id) do
+      nil -> {:error, "No record found"}
+      hub ->
+        RetWeb.Endpoint.broadcast("hub:" <> hub.hub_sid, "hub_refresh_by_admin", %{})
+    end
   end
 
   defp maybe_push_naf(
@@ -1292,6 +1305,17 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:subscriptions, %{web_push: is_push_subscribed, favorites: is_favorited})
         |> Map.put(:perms_token, perms_token)
         |> Map.put(:hub_requires_oauth, params[:hub_requires_oauth])
+        |> Map.put(:sfu, hub.sfu)
+
+      response = case hub.sfu do
+        0 ->
+          response
+          |> Map.put(:sora_channel_id, "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}")
+          |> Map.put(:sora_signaling_url, ["wss://0001.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.2022-2.sora.sora-cloud.shiguredo.app/signaling"])
+          |> Map.put(:sora_access_token, hub.sora_access_token)
+          |> Map.put(:sora_is_debug, false)
+        _ -> response
+      end
 
       existing_stat_count =
         socket

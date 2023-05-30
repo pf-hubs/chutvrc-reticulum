@@ -2,14 +2,20 @@ import Config
 
 # NOTE: this file contains some security keys/certs that are *not* secrets, and are only used for local development purposes.
 
-host = "localhost"
+# host = "localhost"
+host = "change.vr.u-tokyo.ac.jp"
+
 cors_proxy_host = "hubs-proxy.local"
 assets_host = "hubs-assets.local"
 link_host = "hubs-link.local"
-dev_janus_host = "localhost"
+# dev_janus_host = "localhost"
+dev_janus_host = "change.vr.u-tokyo.ac.jp"
 
 # To run reticulum across a LAN for local testing, uncomment and change the line below to the LAN IP
-# host = cors_proxy_host = "192.168.1.27"
+# host = cors_proxy_host = "localhost"
+cors_proxy_host = "change.vr.u-tokyo.ac.jp"
+
+import_config "dev.secret.exs"
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -143,8 +149,10 @@ config :ret, Ret.Storage,
   ttl: 60 * 60 * 24
 
 asset_hosts =
-  "https://localhost:4000 https://localhost:8080 " <>
-    "https://#{host}:4000 https://#{host}:8080 https://#{host}:3000 https://#{host}:8989 https://#{host}:9090 https://#{cors_proxy_host}:4000 " <>
+  "https://localhost:4000 https://localhost:8080 https://localhost:8989 " <>
+    "https://#{host}:4000 https://#{host}:8080 https://#{host}:3001 https://#{host}:8989 https://#{
+      host
+    }:9090 https://#{cors_proxy_host}:4000 " <>
     "https://assets-prod.reticulum.io https://asset-bundles-dev.reticulum.io https://asset-bundles-prod.reticulum.io"
 
 websocket_hosts =
@@ -152,19 +160,33 @@ websocket_hosts =
     "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:8989 wss://#{
       host
     }:9090 " <>
-    "wss://#{host}:4000 wss://#{host}:8080 https://#{host}:8080 https://localhost:8080 wss://localhost:8080"
+    "wss://#{host}:4000 wss://#{host}:8080 https://#{host}:8080 https://localhost:8080 wss://localhost:8080 " <>
+    "wss://*.sora.sora-cloud.shiguredo.app/signaling"
 
 config :ret, RetWeb.Plugs.AddCSP,
   script_src: asset_hosts,
   font_src: asset_hosts,
   style_src: asset_hosts,
   connect_src:
-    "https://#{host}:8080 https://sentry.prod.mozaws.net #{asset_hosts} #{websocket_hosts} https://www.mozilla.org",
+    "https://#{host}:8080 https://sentry.prod.mozaws.net #{asset_hosts} #{websocket_hosts} https://www.mozilla.org https://#{host}:3333 https://#{host}:3001 https://localhost:3001",
   img_src: asset_hosts,
   media_src: asset_hosts,
   manifest_src: asset_hosts
 
-config :ret, Ret.Mailer, adapter: Bamboo.LocalAdapter
+# config :ret, Ret.SoraChannelResolver,
+#   bearer_token: <defined in config/dev.secret.exs>,
+#   project_id: <defined in config/dev.secret.exs>
+
+# config :ret, Ret.Mailer, adapter: Bamboo.LocalAdapter
+config :ret, Ret.Mailer,
+  adapter: Bamboo.SMTPAdapter,
+  server: "smtp.gmail.com",
+  port: 587,
+  # username: <defined in config/dev.secret.exs>,
+  # password: <defined in config/dev.secret.exs>,
+  tls: :always,
+  ssl: false,
+  retries: 3
 
 config :ret, RetWeb.Email, from: "info@hubs-mail.com"
 

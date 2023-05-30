@@ -55,4 +55,9 @@ defmodule RetWeb.Email do
   defp from_address do
     Application.get_env(:ret, __MODULE__)[:from]
   end
+
+  def update_from_address(from = "") do
+    old_email_config = Application.get_env(:ret, RetWeb.Email, %{})
+    Application.put_env(:ret, RetWeb.Email, Map.merge(Enum.into(old_email_config, %{}), %{from: from}))
+  end
 end
