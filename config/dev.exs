@@ -30,8 +30,8 @@ config :ret, RetWeb.Endpoint,
     port: 4000,
     otp_app: :ret,
     cipher_suite: :strong,
-    keyfile: "#{File.cwd!()}/priv/cert/dev/server.key",
-    certfile: "#{File.cwd!()}/priv/cert/dev/server.crt"
+    keyfile: "#{File.cwd!()}/priv/cert/local/key.pem",
+    certfile: "#{File.cwd!()}/priv/cert/local/cert.pem"
   ],
   cors_proxy_url: [scheme: "https", host: cors_proxy_host, port: 4000],
   assets_url: [scheme: "https", host: assets_host, port: 4000],
