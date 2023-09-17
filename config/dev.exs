@@ -157,10 +157,8 @@ asset_hosts =
 
 websocket_hosts =
   "https://localhost:4000 https://localhost:8080 wss://localhost:4000 " <>
-    "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:8989 wss://#{
-      host
-    }:9090 " <>
-    "wss://#{host}:4000 wss://#{host}:8080 https://#{host}:8080 https://localhost:8080 wss://localhost:8080 " <>
+    "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:8989 wss://#{host}:9090 " <>
+    "wss://#{host}:4000 wss://#{host}:8080 https://#{host}:8080 wss://#{host}:4443 https://localhost:8080 wss://localhost:8080 wss://localhost:4443 " <>
     "wss://*.sora.sora-cloud.shiguredo.app/signaling"
 
 config :ret, RetWeb.Plugs.AddCSP,
