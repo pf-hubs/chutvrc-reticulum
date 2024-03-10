@@ -1308,7 +1308,7 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:sfu, hub.sfu)
 
       response = case hub.sfu do
-        0 ->
+        1 ->
           response
           |> Map.put(:sora_channel_id, "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}")
           |> Map.put(:sora_signaling_url, ["wss://0001.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.2022-2.sora.sora-cloud.shiguredo.app/signaling"])
