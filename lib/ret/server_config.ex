@@ -51,6 +51,9 @@ defmodule Ret.ServerConfig do
 
     case result do
       {status, config} when status in [:commit, :ok] -> config
+      {:error, :no_cache} ->
+        {_, config} = fetch_config("")
+        config
     end
   end
 
