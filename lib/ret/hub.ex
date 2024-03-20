@@ -165,8 +165,7 @@ defmodule Ret.Hub do
             embed_token: SecureRandom.hex(),
             member_permissions: default_member_permissions(),
             room_size: AppConfig.get_cached_config_value("features|default_room_size"),
-            # sfu: 1,
-            # sora_access_token: access_token
+            sfu: Ret.ServerConfig.get_cached_config_value("webrtc-settings|default_sfu") || 0,
           },
           params
         )
@@ -420,7 +419,7 @@ defmodule Ret.Hub do
     |> add_hub_sid_to_changeset
     |> add_generated_tokens_to_changeset
     |> add_default_member_permissions_to_changeset
-    |> add_sora_access_token_to_changeset
+    |> add_sfu_to_changeset
     |> unique_constraint(:hub_sid)
   end
 
@@ -485,7 +484,7 @@ defmodule Ret.Hub do
     if !Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") or attrs["sfu"] === nil do
       changeset
     else
-      changeset |> put_change(:sfu, String.to_integer(attrs["sfu"]))
+      changeset |> add_sfu_to_changeset(String.to_integer(attrs["sfu"]))
     end
   end
 
@@ -725,10 +724,20 @@ defmodule Ret.Hub do
     |> put_change(:embed_token, embed_token)
   end
 
-  defp add_sora_access_token_to_changeset(changeset) do
-    changeset
-    |> put_change(:sfu, 0)
-    |> put_change(:sora_access_token, fetch_change(changeset, :hub_sid) |> elem(1) |> Ret.SoraChannelResolver.request_access_token())
+  defp add_sfu_to_changeset(changeset) do
+    sfu = Ret.ServerConfig.get_cached_config_value("webrtc-settings|default_sfu") || 0
+    changeset |> add_sfu_to_changeset(sfu)
+  end
+
+  defp add_sfu_to_changeset(changeset, sfu) do
+    changeset |> put_change(:sfu, sfu)
+    case sfu do
+      1 ->
+        changeset
+        |> put_change(:sora_access_token, fetch_change(changeset, :hub_sid) |> elem(1) |> Ret.SoraChannelResolver.request_access_token())
+      _ ->
+        changeset
+    end
   end
 
   def janus_room_id_for_hub(hub) do
