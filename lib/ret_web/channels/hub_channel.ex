@@ -1306,6 +1306,7 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:perms_token, perms_token)
         |> Map.put(:hub_requires_oauth, params[:hub_requires_oauth])
         |> Map.put(:sfu, hub.sfu)
+        |> Map.put(:allow_switch_sfu, Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") || true)
 
       response = case hub.sfu do
         1 ->
