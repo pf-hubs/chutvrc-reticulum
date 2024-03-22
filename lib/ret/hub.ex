@@ -106,6 +106,7 @@ defmodule Ret.Hub do
     field :room_size, :integer
     field :sfu, :integer, default: 0
     field :sora_access_token, :string
+    field :allow_fullbody_avatar, :boolean, default: true
 
     belongs_to :created_by_account, Ret.Account, references: :account_id
 
@@ -144,6 +145,7 @@ defmodule Ret.Hub do
     :last_active_at,
     :sfu,
     :sora_access_token,
+    :allow_fullbody_avatar,
     :entry_mode | @required_keys
   ]
 
@@ -166,6 +168,7 @@ defmodule Ret.Hub do
             member_permissions: default_member_permissions(),
             room_size: AppConfig.get_cached_config_value("features|default_room_size"),
             sfu: Ret.ServerConfig.get_cached_config_value("webrtc-settings|default_sfu") || 0,
+            allow_fullbody_avatar: Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar") || true,
           },
           params
         )
@@ -420,6 +423,7 @@ defmodule Ret.Hub do
     |> add_generated_tokens_to_changeset
     |> add_default_member_permissions_to_changeset
     |> add_sfu_to_changeset
+    |> add_fullbody_avatar_flag_to_changeset
     |> unique_constraint(:hub_sid)
   end
 
@@ -485,6 +489,18 @@ defmodule Ret.Hub do
       changeset
     else
       changeset |> add_sfu_to_changeset(String.to_integer(attrs["sfu"]))
+    end
+  end
+
+  def maybe_add_fullbody_avatar_flag_to_changeset(changeset, attrs) do
+    if Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar")
+      if attrs["allow_fullbody_avatar"] === nil do
+        changeset
+      else
+        changeset |> add_fullbody_avatar_flag_to_changeset(Map.get(attrs, "allow_fullbody_avatar", true) ||  || Map.get(attrs, :allow_fullbody_avatar, true))
+      end
+    else
+      changeset |> add_fullbody_avatar_flag_to_changeset(false)
     end
   end
 
@@ -738,6 +754,15 @@ defmodule Ret.Hub do
       _ ->
         changeset
     end
+  end
+
+  defp add_fullbody_avatar_flag_to_changeset(changeset) do
+    allow_fullbody_avatar = Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar") || true
+    changeset |> add_fullbody_avatar_flag_to_changeset(allow_fullbody_avatar)
+  end
+
+  defp add_fullbody_avatar_flag_to_changeset(changeset, allow_fullbody_avatar) do
+    changeset |> put_change(:allow_fullbody_avatar, allow_fullbody_avatar)
   end
 
   def janus_room_id_for_hub(hub) do

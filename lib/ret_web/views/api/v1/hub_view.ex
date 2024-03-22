@@ -55,7 +55,8 @@ defmodule RetWeb.Api.V1.HubView do
           room_size: hub |> Hub.room_size_for(),
           member_count: hub |> Hub.member_count_for(),
           lobby_count: hub |> Hub.lobby_count_for(),
-          sfu: hub.sfu
+          sfu: hub.sfu,
+          allow_fullbody_avatar: hub.allow_fullbody_avatar || Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar") || true
         }
       ]
     }
@@ -89,7 +90,8 @@ defmodule RetWeb.Api.V1.HubView do
           room_size: hub |> Hub.room_size_for(),
           member_count: hub |> Hub.member_count_for(),
           lobby_count: hub |> Hub.lobby_count_for(),
-          sfu: hub.sfu
+          sfu: hub.sfu,
+          allow_fullbody_avatar: hub.allow_fullbody_avatar || Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar") || true
         }
       ]
     }

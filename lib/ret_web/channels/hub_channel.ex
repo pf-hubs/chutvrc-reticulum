@@ -546,6 +546,8 @@ defmodule RetWeb.HubChannel do
 
       sfu_changed = Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") and payload["sfu"] !== nil and hub.sfu != payload["sfu"]
 
+      fullbody_avatar_flag_changed = payload["allow_fullbody_avatar"] !== nil and hub.allow_fullbody_avatar != payload["allow_fullbody_avatar"]
+
       stale_fields = []
       stale_fields = if name_changed, do: ["name" | stale_fields], else: stale_fields
 
@@ -566,12 +568,15 @@ defmodule RetWeb.HubChannel do
 
       stale_fields = if sfu_changed, do: ["sfu" | stale_fields], else: stale_fields
 
+      stale_fields = if fullbody_avatar_flag_changed, do: ["allow_fullbody_avatar" | stale_fields], else: stale_fields
+
       hub
       |> Hub.add_attrs_to_changeset(payload)
       |> Hub.add_member_permissions_to_changeset(payload)
       |> Hub.maybe_add_promotion_to_changeset(account, hub, payload)
       |> Hub.maybe_add_entry_mode_to_changeset(payload)
       |> Hub.maybe_add_sfu_to_changeset(payload)
+      |> Hub.maybe_add_fullbody_avatar_flag_to_changeset(payload)
       |> Repo.update!()
       |> Repo.preload(Hub.hub_preloads())
       |> broadcast_hub_refresh!(socket, stale_fields)
@@ -1307,6 +1312,7 @@ defmodule RetWeb.HubChannel do
         |> Map.put(:hub_requires_oauth, params[:hub_requires_oauth])
         |> Map.put(:sfu, hub.sfu)
         |> Map.put(:allow_switch_sfu, Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") || true)
+        |> Map.put(:allow_fullbody_avatar, hub.allow_fullbody_avatar || Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar") || true)
 
       response = case hub.sfu do
         1 ->
