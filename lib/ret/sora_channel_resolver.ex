@@ -29,10 +29,10 @@ defmodule Ret.SoraChannelResolver do
   end
 
   defp bearer_token do
-    Application.get_env(:ret, Ret.SoraChannelResolver)[:bearer_token]
+    Ret.ServerConfig.get_cached_config_value("webrtc-settings|sora_bearer_token") || Application.get_env(:ret, Ret.SoraChannelResolver)[:bearer_token] || ""
   end
 
   def project_id do
-    Application.get_env(:ret, Ret.SoraChannelResolver)[:project_id]
+    Ret.ServerConfig.get_cached_config_value("webrtc-settings|sora_project_id") || Application.get_env(:ret, Ret.SoraChannelResolver)[:project_id] || ""
   end
 end
