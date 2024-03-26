@@ -493,11 +493,11 @@ defmodule Ret.Hub do
   end
 
   def maybe_add_fullbody_avatar_flag_to_changeset(changeset, attrs) do
-    if Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar")
+    if Ret.ServerConfig.get_cached_config_value("avatar-settings|allow_fullbody_avatar") do
       if attrs["allow_fullbody_avatar"] === nil do
         changeset
       else
-        changeset |> add_fullbody_avatar_flag_to_changeset(Map.get(attrs, "allow_fullbody_avatar", true) ||  || Map.get(attrs, :allow_fullbody_avatar, true))
+        changeset |> add_fullbody_avatar_flag_to_changeset(Map.get(attrs, "allow_fullbody_avatar", true) || Map.get(attrs, :allow_fullbody_avatar, true))
       end
     else
       changeset |> add_fullbody_avatar_flag_to_changeset(false)
