@@ -1,4 +1,41 @@
-# Reticulum
+# chutvrc Reticulum
+
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+
+The server-side code for chutvrc, forked from [Reticulum](https://github.com/mozilla/reticulum), a hybrid game networking and web API server, focused on Social Mixed Reality.
+
+
+## chutvrc features
+
+Some notable features are,
+
+- Full-body avatar (ReadyPlayerMe, VRoid)
+- BitECS implementation
+- Alternative WebRTC SFU (selection for Third-Pary WebRTC)
+- Synchronizing avatar transform with WebRTC DataChannel
+
+For more details, please see the [client-side code for chutvr](https://github.com/pf-hubs/chutvrc-hubs).
+
+## Funding and Sponsor
+
+<div align="center">
+    <img src=".github/media/vrcenter-logo.png" width="320">
+    <img src=".github/media/change-logo.png" width="320">
+</div>
+
+- chutvrc is sponsored and developed for [CHANGE Project](https://change.kawasaki-net.ne.jp/en/), by a research team at the [Virtual Reality Educational Research Center](https://vr.u-tokyo.ac.jp/), The University of Tokyo.
+- You can support this development through the GitHub Sponsor button which is linked to the [UTokyo Foundation](https://utf.u-tokyo.ac.jp/en).
+- If you want to support this project only, please write in the donation purpose "For Virtual Reality Educational Research Center, chutvrc related research/educational purpose."
+  - Please be aware that 30% of the amount of donation will be used by the university administration office even if you write the donation purpose.
+
+---
+
+Below is the original README for Mozilla Reticulum, which most information are also useful for chutvrc.
+
+It will be updated to migration information considering the current status of Mozilla Hubs, which is planned to shutdown at the end of May 2024.
+
+---
+
 Note: **Due to our small team size, we don't support setting up Reticulum locally due to restrictions on developer credentials. Although relatively difficult and new territory, you're welcome to set up this up yourself. In addition to running Reticulum locally, you'll need to also run [Hubs](https://github.com/mozilla/hubs) and [Dialog](https://github.com/mozilla/dialog) locally because the developer Dialog server is locked down and your local Reticulum will not connect properly)**
 
 Reference [this discussion thread](https://github.com/mozilla/hubs/discussions/3323) for more information.
