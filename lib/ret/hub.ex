@@ -488,7 +488,7 @@ defmodule Ret.Hub do
     if !Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") or attrs["sfu"] === nil do
       changeset
     else
-      changeset |> add_sfu_to_changeset(String.to_integer(attrs["sfu"]))
+      changeset |> add_sfu_to_changeset(attrs["sfu"])
     end
   end
 
