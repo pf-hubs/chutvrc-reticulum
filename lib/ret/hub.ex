@@ -746,11 +746,13 @@ defmodule Ret.Hub do
   end
 
   defp add_sfu_to_changeset(changeset, sfu) do
-    changeset |> put_change(:sfu, sfu)
+    sfu = String.to_integer(sfu)
+    changeset = put_change(changeset, :sfu, sfu)
     case sfu do
       1 ->
+        token = fetch_field(changeset, :hub_sid) |> elem(1) |> Ret.SoraChannelResolver.request_access_token()
         changeset
-        |> put_change(:sora_access_token, fetch_change(changeset, :hub_sid) |> elem(1) |> Ret.SoraChannelResolver.request_access_token())
+        |> put_change(:sora_access_token, token)
       _ ->
         changeset
     end
