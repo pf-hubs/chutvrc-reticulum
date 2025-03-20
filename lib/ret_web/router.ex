@@ -99,9 +99,9 @@ defmodule RetWeb.Router do
 
     # forward "/", RetWeb.Plugs.PostgrestProxy
 
-    if(Mix.env() == :prod) do
-      pipe_through([:secure_headers])
-    end
+    # if(Mix.env() == :prod) do
+      # pipe_through([:secure_headers])
+    # end
 
     forward "/", RetWeb.Plugs.PostgrestProxy
   end

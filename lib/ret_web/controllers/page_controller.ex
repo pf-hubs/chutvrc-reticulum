@@ -169,11 +169,11 @@ defmodule RetWeb.PageController do
   end
 
   def render_for_path("/", params, conn) do
-    if !Enum.empty?(params) || Ret.Account.has_accounts?() do
+    # if !Enum.empty?(params) || Ret.Account.has_accounts?() do
       conn |> render_index
-    else
-      conn |> redirect(to: "/admin")
-    end
+    # else
+    #   conn |> redirect(to: "/admin")
+    # end
   end
 
   def render_for_path("/scenes/" <> path, _params, conn) do

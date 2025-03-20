@@ -544,7 +544,7 @@ defmodule RetWeb.HubChannel do
       entry_mode_changed =
         payload["entry_mode"] !== nil and hub.entry_mode != payload["entry_mode"]
 
-      sfu_changed = Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") and payload["sfu"] !== nil and hub.sfu != payload["sfu"]
+      sfu_changed = (Ret.ServerConfig.get_cached_config_value("webrtc-settings|allow_switch_sfu") || true) and payload["sfu"] !== nil and hub.sfu != payload["sfu"]
 
       fullbody_avatar_flag_changed = payload["allow_fullbody_avatar"] !== nil and hub.allow_fullbody_avatar != payload["allow_fullbody_avatar"]
 
@@ -1318,7 +1318,7 @@ defmodule RetWeb.HubChannel do
         1 ->
           response
           |> Map.put(:sora_channel_id, "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}")
-          |> Map.put(:sora_signaling_url, ["wss://0001.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.2022-2.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.2022-2.sora.sora-cloud.shiguredo.app/signaling"])
+          |> Map.put(:sora_signaling_url, ["wss://0001.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.sora.sora-cloud.shiguredo.app/signaling"])
           |> Map.put(:sora_access_token, hub.sora_access_token)
           |> Map.put(:sora_is_debug, false)
         _ -> response
