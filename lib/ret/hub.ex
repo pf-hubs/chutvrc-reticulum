@@ -746,7 +746,11 @@ defmodule Ret.Hub do
   end
 
   defp add_sfu_to_changeset(changeset, sfu) do
-    sfu = String.to_integer(sfu)
+    sfu =
+      case is_binary(sfu) do
+        true -> String.to_integer(sfu)
+        false -> sfu
+      end
     changeset = put_change(changeset, :sfu, sfu)
     case sfu do
       1 ->
