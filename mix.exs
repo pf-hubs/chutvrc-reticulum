@@ -81,6 +81,7 @@ defmodule Ret.Mixfile do
       {:ua_parser, "~> 1.5"},
       {:download, git: "https://github.com/gfodor/download.git", branch: "reticulum/master"},
       {:reverse_proxy_plug, "2.3.0"},
+      {:hackney, "1.18.1", override: true},
       {:inet_cidr, "~> 1.0"},
       {:dns, "~> 2.2.0"},
       {:oauther, "~> 1.1"},
