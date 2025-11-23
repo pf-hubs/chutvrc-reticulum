@@ -110,8 +110,8 @@ defmodule Ret.ServerConfig do
     end
   end
 
-  def get_cached_config_value(key), do: get_cached_config_value(key, Mix.env())
-  def get_cached_config_owned_file_uri(key), do: get_cached_config_owned_file_uri(key, Mix.env())
+  def get_cached_config_value(key), do: get_cached_config_value(key, nil)
+  def get_cached_config_owned_file_uri(key), do: get_cached_config_owned_file_uri(key, nil)
 
   # No caching in test
   def get_cached_config_value(key, :test), do: get_config_value(key)

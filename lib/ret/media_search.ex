@@ -125,6 +125,10 @@ defmodule Ret.MediaSearch do
     public_rooms_search(cursor, q)
   end
 
+  # def search(%Ret.MediaSearchQuery{source: "rooms", filter: "created", cursor: cursor, q: q}) do
+  #   created_rooms_search(cursor, q)
+  # end
+
   def search(%Ret.MediaSearchQuery{
         source: "rooms",
         filter: "created",
