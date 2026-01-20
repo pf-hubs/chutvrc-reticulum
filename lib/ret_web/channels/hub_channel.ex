@@ -35,7 +35,11 @@ defmodule RetWeb.HubChannel do
     "unblock",
     # See internal_naf_event_for/2
     "maybe-naf",
-    "maybe-nafr"
+    "maybe-nafr",
+    # IoT device signaling (libpeer integration)
+    "device:offer",
+    "device:answer",
+    "device:ice_candidate"
   ]
 
   def join("hub:" <> hub_sid, %{"profile" => profile, "context" => context} = params, socket) do
@@ -735,6 +739,60 @@ defmodule RetWeb.HubChannel do
     end
   end
 
+  # ========== IoT Device Signaling (libpeer integration) ==========
+  # These handlers relay WebRTC signaling messages between browsers and IoT devices
+
+  # Relay SDP offer from device to browser (or browser to device)
+  def handle_in("device:offer" = event, %{"device_id" => _device_id} = payload, socket) do
+    broadcast!(socket, event, payload |> payload_with_from(socket))
+    {:noreply, socket}
+  end
+
+  # Relay SDP answer from browser to device (or device to browser)
+  def handle_in("device:answer" = event, %{"device_id" => _device_id} = payload, socket) do
+    broadcast!(socket, event, payload |> payload_with_from(socket))
+    {:noreply, socket}
+  end
+
+  # Relay ICE candidates between browser and device
+  def handle_in("device:ice_candidate" = event, %{"device_id" => _device_id} = payload, socket) do
+    broadcast!(socket, event, payload |> payload_with_from(socket))
+    {:noreply, socket}
+  end
+
+  # List available IoT devices in the room
+  # For now, this returns presence list; can be extended to track device-specific presence
+  def handle_in("device:list", _payload, socket) do
+    # Return list of sessions that can act as device endpoints
+    # In future, this can be filtered to only include IoT devices
+    presence_list = Presence.list(socket)
+    device_sessions = presence_list
+      |> Enum.map(fn {session_id, data} ->
+        %{session_id: session_id, metas: Map.get(data, :metas, [])}
+      end)
+    {:reply, {:ok, %{devices: device_sessions}}, socket}
+  end
+
+  # Device registration (optional - for tracking device metadata)
+  def handle_in("device:register", %{"device_id" => device_id, "metadata" => metadata}, socket) do
+    # Broadcast device registration to room participants
+    broadcast!(socket, "device:registered", %{
+      device_id: device_id,
+      metadata: metadata,
+      from_session_id: socket.assigns.session_id
+    })
+    {:reply, {:ok, %{device_id: device_id}}, socket}
+  end
+
+  # Device disconnection notification
+  def handle_in("device:disconnect", %{"device_id" => device_id}, socket) do
+    broadcast!(socket, "device:disconnected", %{
+      device_id: device_id,
+      from_session_id: socket.assigns.session_id
+    })
+    {:noreply, socket}
+  end
+
   def handle_in(_message, _payload, socket) do
     {:noreply, socket}
   end
@@ -859,6 +917,33 @@ defmodule RetWeb.HubChannel do
 
   def handle_out("host_changed" = event, payload, socket) do
     push(socket, event, payload)
+    {:noreply, socket}
+  end
+
+  # ========== IoT Device Signaling Output Handlers ==========
+  # Filter device signaling messages - only push to the intended recipient
+
+  # Device offer - push to all sessions except the sender (they'll handle routing)
+  def handle_out("device:offer" = event, %{from_session_id: from_session_id} = payload, socket) do
+    if from_session_id != socket.assigns.session_id do
+      push(socket, event, payload |> payload_without_from)
+    end
+    {:noreply, socket}
+  end
+
+  # Device answer - push to all sessions except the sender
+  def handle_out("device:answer" = event, %{from_session_id: from_session_id} = payload, socket) do
+    if from_session_id != socket.assigns.session_id do
+      push(socket, event, payload |> payload_without_from)
+    end
+    {:noreply, socket}
+  end
+
+  # ICE candidate - push to all sessions except the sender
+  def handle_out("device:ice_candidate" = event, %{from_session_id: from_session_id} = payload, socket) do
+    if from_session_id != socket.assigns.session_id do
+      push(socket, event, payload |> payload_without_from)
+    end
     {:noreply, socket}
   end
 
