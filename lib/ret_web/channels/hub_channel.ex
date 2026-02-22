@@ -668,6 +668,34 @@ defmodule RetWeb.HubChannel do
     {:reply, {:ok, %{perms_token: perms_token}}, socket}
   end
 
+  def handle_in("refresh_sfu_token", _payload, socket) do
+    hub = socket |> hub_for_socket |> Repo.preload(Hub.hub_preloads())
+    session_id = socket.assigns.session_id
+
+    case hub.sfu do
+      1 ->
+        sora_urls = get_sora_signaling_urls()
+        {:reply, {:ok, %{
+          sfu_access_token: hub.sora_access_token,
+          sfu_server_url: sora_urls,
+          sfu_room_id: "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}"
+        }}, socket}
+      2 ->
+        token = Ret.LivekitTokenGenerator.generate_access_token(hub.hub_sid, session_id)
+        if token == "" do
+          {:reply, {:error, %{reason: "livekit_token_generation_failed"}}, socket}
+        else
+          {:reply, {:ok, %{
+            sfu_access_token: token,
+            sfu_server_url: Ret.LivekitTokenGenerator.get_server_url(),
+            sfu_room_id: hub.hub_sid
+          }}, socket}
+        end
+      _ ->
+        {:reply, {:error, %{reason: "sfu_type_not_supported"}}, socket}
+    end
+  end
+
   def handle_in("block" = event, %{"session_id" => session_id} = payload, socket) do
     socket =
       socket
@@ -1401,11 +1429,23 @@ defmodule RetWeb.HubChannel do
 
       response = case hub.sfu do
         1 ->
+          sora_urls = get_sora_signaling_urls()
+          sora_channel_id = "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}"
           response
-          |> Map.put(:sora_channel_id, "#{hub.hub_sid}@#{Ret.SoraChannelResolver.project_id()}")
-          |> Map.put(:sora_signaling_url, ["wss://0001.sora.sora-cloud.shiguredo.app/signaling", "wss://0002.sora.sora-cloud.shiguredo.app/signaling", "wss://0003.sora.sora-cloud.shiguredo.app/signaling"])
+          |> Map.put(:sfu_access_token, hub.sora_access_token)
+          |> Map.put(:sfu_server_url, sora_urls)
+          |> Map.put(:sfu_room_id, sora_channel_id)
+          |> Map.put(:sora_channel_id, sora_channel_id)
+          |> Map.put(:sora_signaling_url, sora_urls)
           |> Map.put(:sora_access_token, hub.sora_access_token)
           |> Map.put(:sora_is_debug, false)
+        2 ->
+          livekit_token = Ret.LivekitTokenGenerator.generate_access_token(hub.hub_sid, socket.assigns.session_id)
+          server_url = Ret.LivekitTokenGenerator.get_server_url()
+          response
+          |> Map.put(:sfu_access_token, livekit_token)
+          |> Map.put(:sfu_server_url, server_url)
+          |> Map.put(:sfu_room_id, hub.hub_sid)
         _ -> response
       end
 
@@ -1530,6 +1570,13 @@ defmodule RetWeb.HubChannel do
   defp hub_for_socket(socket) do
     Repo.get_by(Hub, hub_sid: socket.assigns.hub_sid)
     |> Repo.preload([:hub_bindings, :hub_role_memberships])
+  end
+
+  defp get_sora_signaling_urls do
+    Ret.ServerConfig.get_cached_config_value("webrtc-settings|sora_signaling_urls") ||
+      ["wss://0001.sora.sora-cloud.shiguredo.app/signaling",
+       "wss://0002.sora.sora-cloud.shiguredo.app/signaling",
+       "wss://0003.sora.sora-cloud.shiguredo.app/signaling"]
   end
 
   defp payload_with_from(payload, socket) do
