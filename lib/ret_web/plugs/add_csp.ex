@@ -102,6 +102,11 @@ defmodule RetWeb.Plugs.AddCSP do
     thumbnail_url =
       config_url(:thumbnail_url) || cors_proxy_url |> String.replace("cors-proxy", "nearspark")
 
+    # LiveKit server URLs (dynamic from configuration)
+    livekit_server_url = Ret.LivekitTokenGenerator.get_server_url()
+    livekit_wss_url = livekit_server_url
+    livekit_https_url = String.replace(livekit_server_url, "wss://", "https://")
+
     # TODO: The https janus port CSP rules (including the default) can be removed after dialog is deployed,
     # since they are used to snoop and see what SFU it is.
     default_janus_csp_rule =
@@ -197,7 +202,9 @@ defmodule RetWeb.Plugs.AddCSP do
         ret_direct_connect,
         storage_url,
         thumbnail_url,
-        "https://raw.githubusercontent.com"
+        "https://raw.githubusercontent.com",
+        livekit_https_url,
+        livekit_wss_url
       ],
       "img-src" => [
         "'self'",

@@ -22,6 +22,10 @@ config :mime, :types, %{
   "application/wasm" => ["wasm"]
 }
 
+config :mime, :extensions, %{
+  "json" => "application/json"
+}
+
 config :ret, Ret.AppConfig, caching?: true
 
 # Configures the endpoint
