@@ -18,6 +18,8 @@ assets/.yarn/
 # Self-signed certs for local development
 priv/server.key
 priv/server.pem
+priv/dev-ssl.key
+priv/dev-ssl.cert
 priv/cert/*
 
 # generated static files
