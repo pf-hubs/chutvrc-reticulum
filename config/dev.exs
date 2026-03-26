@@ -2,15 +2,12 @@ import Config
 
 # NOTE: this file contains some security keys/certs that are *not* secrets, and are only used for local development purposes.
 
-host = "hubs.local"
+host = System.get_env("HUBS_HOST") || "hubs.local"
 
-cors_proxy_host = "hubs-proxy.local"
+cors_proxy_host = System.get_env("HUBS_HOST") || "hubs-proxy.local"
 assets_host = "hubs-assets.local"
 link_host = "hubs-link.local"
-dev_janus_host = "hubs.local"
-
-# To run reticulum across a LAN for local testing, uncomment and change the line below to the LAN IP
-host = cors_proxy_host = "hubs.local"
+dev_janus_host = host
 
 
 # For development, we disable any cache and enable
@@ -146,20 +143,18 @@ config :ret, Ret.Storage,
 
 asset_hosts =
   "https://localhost:4000 https://localhost:8080 https://localhost:3001 https://localhost:8989 https://localhost:9090 " <>
-    "https://hubs.local:4000 https://hubs.local:8080 https://hubs.local:3001 https://hubs.local:8989 https://hubs.local:9090 https://hubs-proxy.local:4000 " <>
     "https://#{host}:4000 https://#{host}:8080 https://#{host}:3001 https://#{host}:8989 https://#{host}:9090 https://#{cors_proxy_host}:4000 " <>
     "https://hubs-client:4000 https://hubs-client:8080 https://hubs-admin:4000 https://hubs-admin:8989 " <>
     "https://assets-prod.reticulum.io https://asset-bundles-dev.reticulum.io https://asset-bundles-prod.reticulum.io"
 
 websocket_hosts =
   "https://localhost:4000 https://localhost:8080 wss://localhost:4000 wss://localhost:8080 wss://localhost:4443 wss://localhost:8989 wss://localhost:9090 " <>
-    "https://hubs.local:4000 https://hubs.local:8080 wss://hubs.local:4000 wss://hubs.local:8080 wss://hubs.local:4443 wss://hubs.local:8989 wss://hubs.local:9090 " <>
     "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:4443 wss://#{host}:8989 wss://#{host}:9090 " <>
     "wss://*.sora.sora-cloud.shiguredo.app/signaling"
 
 admin_connect_hosts =
-  "wss://hubs.local http://localhost:3333 http://hubs.local:3333 http://#{host}:3333 " <>
-    "https://localhost:3000 https://hubs.local:3000 https://#{host}:3000 http://postgrest:3000"
+  "wss://#{host} http://localhost:3333 http://#{host}:3333 " <>
+    "https://localhost:3000 https://#{host}:3000 http://postgrest:3000"
 
 config :ret, RetWeb.Plugs.AddCSP,
   script_src: asset_hosts,
