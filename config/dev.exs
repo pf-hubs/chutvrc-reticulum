@@ -2,20 +2,13 @@ import Config
 
 # NOTE: this file contains some security keys/certs that are *not* secrets, and are only used for local development purposes.
 
-# host = "localhost"
-host = "change.vr.u-tokyo.ac.jp"
+host = System.get_env("HUBS_HOST") || "hubs.local"
 
-cors_proxy_host = "hubs-proxy.local"
+cors_proxy_host = System.get_env("HUBS_HOST") || "hubs-proxy.local"
 assets_host = "hubs-assets.local"
 link_host = "hubs-link.local"
-# dev_janus_host = "localhost"
-dev_janus_host = "change.vr.u-tokyo.ac.jp"
+dev_janus_host = host
 
-# To run reticulum across a LAN for local testing, uncomment and change the line below to the LAN IP
-# host = cors_proxy_host = "localhost"
-cors_proxy_host = "change.vr.u-tokyo.ac.jp"
-
-import_config "dev.secret.exs"
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -30,8 +23,8 @@ config :ret, RetWeb.Endpoint,
     port: 4000,
     otp_app: :ret,
     cipher_suite: :strong,
-    keyfile: "#{File.cwd!()}/priv/cert/local/key.pem",
-    certfile: "#{File.cwd!()}/priv/cert/local/cert.pem"
+    keyfile: "#{File.cwd!()}/priv/dev-ssl.key",
+    certfile: "#{File.cwd!()}/priv/dev-ssl.cert"
   ],
   cors_proxy_url: [scheme: "https", host: cors_proxy_host, port: 4000],
   assets_url: [scheme: "https", host: assets_host, port: 4000],
@@ -149,24 +142,26 @@ config :ret, Ret.Storage,
   ttl: 60 * 60 * 24
 
 asset_hosts =
-  "https://localhost:4000 https://localhost:8080 https://localhost:8989 " <>
-    "https://#{host}:4000 https://#{host}:8080 https://#{host}:3001 https://#{host}:8989 https://#{
-      host
-    }:9090 https://#{cors_proxy_host}:4000 " <>
+  "https://localhost:4000 https://localhost:8080 https://localhost:3001 https://localhost:8989 https://localhost:9090 " <>
+    "https://#{host}:4000 https://#{host}:8080 https://#{host}:3001 https://#{host}:8989 https://#{host}:9090 https://#{cors_proxy_host}:4000 " <>
+    "https://hubs-client:4000 https://hubs-client:8080 https://hubs-admin:4000 https://hubs-admin:8989 " <>
     "https://assets-prod.reticulum.io https://asset-bundles-dev.reticulum.io https://asset-bundles-prod.reticulum.io"
 
 websocket_hosts =
-  "https://localhost:4000 https://localhost:8080 wss://localhost:4000 " <>
-    "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:8989 wss://#{host}:9090 " <>
-    "wss://#{host}:4000 wss://#{host}:8080 https://#{host}:8080 wss://#{host}:4443 https://localhost:8080 wss://localhost:8080 wss://localhost:4443 " <>
+  "https://localhost:4000 https://localhost:8080 wss://localhost:4000 wss://localhost:8080 wss://localhost:4443 wss://localhost:8989 wss://localhost:9090 " <>
+    "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:4443 wss://#{host}:8989 wss://#{host}:9090 " <>
     "wss://*.sora.sora-cloud.shiguredo.app/signaling"
+
+admin_connect_hosts =
+  "wss://#{host} http://localhost:3333 http://#{host}:3333 " <>
+    "https://localhost:3000 https://#{host}:3000 http://postgrest:3000"
 
 config :ret, RetWeb.Plugs.AddCSP,
   script_src: asset_hosts,
   font_src: asset_hosts,
   style_src: asset_hosts,
   connect_src:
-    "https://#{host}:8080 https://sentry.prod.mozaws.net #{asset_hosts} #{websocket_hosts} https://www.mozilla.org https://#{host}:3333 https://#{host}:3001 https://localhost:3001",
+    "https://#{host}:8080 https://sentry.prod.mozaws.net #{asset_hosts} #{websocket_hosts} https://www.mozilla.org https://#{host}:3333 https://#{host}:3001 https://localhost:3001" <> " #{admin_connect_hosts}",
   img_src: asset_hosts,
   media_src: asset_hosts,
   manifest_src: asset_hosts
