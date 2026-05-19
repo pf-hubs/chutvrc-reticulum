@@ -148,8 +148,8 @@ asset_hosts =
     "https://assets-prod.reticulum.io https://asset-bundles-dev.reticulum.io https://asset-bundles-prod.reticulum.io"
 
 websocket_hosts =
-  "https://localhost:4000 https://localhost:8080 wss://localhost:4000 wss://localhost:8080 wss://localhost:4443 wss://localhost:8989 wss://localhost:9090 " <>
-    "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:4443 wss://#{host}:8989 wss://#{host}:9090 " <>
+  "https://localhost:4000 https://localhost:8080 wss://localhost:4000 wss://localhost:8080 wss://localhost:4443 wss://localhost:8989 wss://localhost:9090 wss://localhost:9099 " <>
+    "https://#{host}:4000 https://#{host}:8080 wss://#{host}:4000 wss://#{host}:8080 wss://#{host}:4443 wss://#{host}:8989 wss://#{host}:9090 wss://#{host}:9099 " <>
     "wss://*.sora.sora-cloud.shiguredo.app/signaling"
 
 admin_connect_hosts =
