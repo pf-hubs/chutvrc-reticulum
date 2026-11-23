@@ -4,7 +4,8 @@ ARG ELIXIR_VERSION=1.14.3
 ARG ERLANG_VERSION=23.3.4.18
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${ERLANG_VERSION}-alpine-${ALPINE_VERSION} AS base
-RUN mix do local.hex --force, local.rebar --force
+# Hex 2.7.0 does not load on Erlang 23; 2.3.1 does
+RUN mix do local.hex 2.3.1 --force, local.rebar --force
 
 FROM base AS dev
 RUN apk add --no-cache\
