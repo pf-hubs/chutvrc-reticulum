@@ -15,7 +15,7 @@ RUN apk add --no-cache\
 COPY container/dev-perms.pem /etc/perms.pem
 COPY container/trapped-mix /usr/local/bin/trapped-mix
 WORKDIR /code
-HEALTHCHECK CMD wget --no-check-certificate --no-verbose --tries=1 --spider https://localhost:4000/stream-offline.png
+HEALTHCHECK CMD wget --no-check-certificate --no-verbose --tries=1 --spider https://127.0.0.1:4000/stream-offline.png
 CMD sh -c "PERMS_KEY=\"$(cat /etc/perms.pem)\" mix phx.server"
 
 FROM base AS builder
