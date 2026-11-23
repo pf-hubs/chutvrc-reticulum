@@ -28,6 +28,7 @@ defmodule RetWeb.HubChannel do
   intercept [
     "hub_refresh",
     "mute",
+    "public_speaker_allowed",
     "add_owner",
     "remove_owner",
     "message",
@@ -696,6 +697,50 @@ defmodule RetWeb.HubChannel do
     end
   end
 
+  # An owner lets another session of the room speak to the other rooms
+  def handle_in(
+        "allow_public_speaker",
+        %{"session_id" => session_id, "allowed" => allowed},
+        socket
+      )
+      when is_boolean(allowed) do
+    hub = socket |> hub_for_socket |> Repo.preload(Hub.hub_preloads())
+
+    if owner_of_hub?(hub, socket) do
+      broadcast!(socket, "public_speaker_allowed", %{
+        "session_id" => session_id,
+        "allowed" => allowed
+      })
+
+      {:reply, :ok, socket}
+    else
+      {:reply, {:error, %{reason: "not_allowed"}}, socket}
+    end
+  end
+
+  # A LiveKit token for one of a broadcast's sessions. Each has its own room and identity: under the
+  # room token's identity it would throw the client's connection to the room out.
+  def handle_in("public_speaking_sfu_token", %{"role" => role} = payload, socket) do
+    hub = socket |> hub_for_socket |> Repo.preload(Hub.hub_preloads())
+
+    with :ok <- check_public_speaking(role, hub, socket),
+         {:ok, room, identity, opts} <-
+           public_speaking_scope(role, payload, socket.assigns.session_id, hub.hub_sid),
+         token when token != "" <-
+           Ret.LivekitTokenGenerator.generate_access_token(room, identity, opts) do
+      {:reply,
+       {:ok,
+        %{
+          sfu_access_token: token,
+          sfu_server_url: Ret.LivekitTokenGenerator.get_server_url(),
+          sfu_room_id: room
+        }}, socket}
+    else
+      {:error, reason} -> {:reply, {:error, %{reason: reason}}, socket}
+      "" -> {:reply, {:error, %{reason: "livekit_token_generation_failed"}}, socket}
+    end
+  end
+
   def handle_in("block" = event, %{"session_id" => session_id} = payload, socket) do
     socket =
       socket
@@ -855,6 +900,18 @@ defmodule RetWeb.HubChannel do
     end
 
     {:noreply, socket}
+  end
+
+  def handle_out(
+        "public_speaker_allowed",
+        %{"session_id" => session_id, "allowed" => allowed},
+        socket
+      ) do
+    if socket.assigns.session_id == session_id do
+      {:noreply, socket |> assign(:public_speaker_allowed, allowed)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_out("hub_refresh" = event, %{stale_fields: stale_fields} = payload, socket) do
@@ -1023,6 +1080,45 @@ defmodule RetWeb.HubChannel do
        ) do
     {:noreply, socket}
   end
+
+  defp owner_of_hub?(hub, socket) do
+    case Guardian.Phoenix.Socket.current_resource(socket) do
+      %Ret.Account{account_id: account_id} -> hub |> Hub.is_owner?(account_id)
+      _ -> false
+    end
+  end
+
+  defp check_public_speaking(role, hub, socket) do
+    cond do
+      !Ret.AppConfig.get_config_bool("features|enable_public_speaking") ->
+        {:error, "feature_disabled"}
+
+      hub.sfu != 2 ->
+        {:error, "sfu_type_not_supported"}
+
+      owner_of_hub?(hub, socket) ->
+        :ok
+
+      role == "speak" and socket.assigns[:public_speaker_allowed] == true ->
+        :ok
+
+      true ->
+        {:error, "not_allowed"}
+    end
+  end
+
+  # The room a broadcast session joins, its identity there and what it may not do
+  defp public_speaking_scope("speak", _payload, session_id, _hub_sid),
+    do: {:ok, "public_speaking", "PS-" <> session_id, [can_subscribe: false]}
+
+  defp public_speaking_scope("listen", _payload, session_id, _hub_sid),
+    do: {:ok, "public_speaking", session_id, [can_publish: false, can_publish_data: false]}
+
+  defp public_speaking_scope("relay", %{"speaker" => "PS-" <> _ = speaker}, _session_id, hub_sid),
+    do: {:ok, hub_sid, speaker, [can_subscribe: false]}
+
+  defp public_speaking_scope(_role, _payload, _session_id, _hub_sid),
+    do: {:error, "invalid_role"}
 
   defp spawn_permitted?(template, socket) do
     account = Guardian.Phoenix.Socket.current_resource(socket)

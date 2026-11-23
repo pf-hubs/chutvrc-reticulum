@@ -56,7 +56,7 @@ config :ret, RetWeb.Endpoint,
 
 # Watch static and templates for browser reloading.
 config :ret, RetWeb.Endpoint,
-  # static_url: [scheme: "https", host: "assets-prod.reticulum.io", port: 443],
+  # static_url: [scheme: "https", host: "assets-prod.reticulum.io.invalid", port: 443],
   live_reload: [
     patterns: [
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
@@ -145,7 +145,7 @@ asset_hosts =
   "https://localhost:4000 https://localhost:8080 https://localhost:3001 https://localhost:8989 https://localhost:9090 " <>
     "https://#{host}:4000 https://#{host}:8080 https://#{host}:3001 https://#{host}:8989 https://#{host}:9090 https://#{cors_proxy_host}:4000 " <>
     "https://hubs-client:4000 https://hubs-client:8080 https://hubs-admin:4000 https://hubs-admin:8989 " <>
-    "https://assets-prod.reticulum.io https://asset-bundles-dev.reticulum.io https://asset-bundles-prod.reticulum.io"
+    "https://assets-prod.reticulum.io.invalid https://asset-bundles-dev.reticulum.io.invalid https://asset-bundles-prod.reticulum.io.invalid"
 
 websocket_hosts =
   "https://localhost:4000 https://localhost:8080 wss://localhost:4000 wss://localhost:8080 wss://localhost:4443 wss://localhost:8989 wss://localhost:9090 " <>
@@ -208,7 +208,7 @@ config :sentry,
 
 config :ret, Ret.Habitat, ip: "127.0.0.1", http_port: 9631
 
-dialog_hostname = System.get_env("DIALOG_HOSTNAME") || "dev-janus.reticulum.io"
+dialog_hostname = System.get_env("DIALOG_HOSTNAME") || "dev-janus.reticulum.io.invalid"
 dialog_port = String.to_integer(System.get_env("DIALOG_PORT") || "443")
 
 config :ret, Ret.JanusLoadStatus, default_janus_host: dev_janus_host, janus_port: 4443
