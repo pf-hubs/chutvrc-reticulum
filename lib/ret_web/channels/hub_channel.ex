@@ -1107,12 +1107,13 @@ defmodule RetWeb.HubChannel do
     end
   end
 
-  # The room a broadcast session joins, its identity there and what it may not do
+  # The room a broadcast session joins, its identity there and what it may not do. A speaker and a
+  # listener both keep the data channel: listeners send their reactions back to the speaker.
   defp public_speaking_scope("speak", _payload, session_id, _hub_sid),
-    do: {:ok, "public_speaking", "PS-" <> session_id, [can_subscribe: false]}
+    do: {:ok, "public_speaking", "PS-" <> session_id, []}
 
   defp public_speaking_scope("listen", _payload, session_id, _hub_sid),
-    do: {:ok, "public_speaking", session_id, [can_publish: false, can_publish_data: false]}
+    do: {:ok, "public_speaking", session_id, [can_publish: false]}
 
   defp public_speaking_scope("relay", %{"speaker" => "PS-" <> _ = speaker}, _session_id, hub_sid),
     do: {:ok, hub_sid, speaker, [can_subscribe: false]}
